@@ -46,6 +46,24 @@
             color: #1a2a3a;
             border-bottom: 2px solid #1a2a3a;
         }
+		/* Login modal transition */
+    #login-panel {
+        transition: all 0.3s ease;
+    }
+    
+    /* User dropdown styles */
+    .user-dropdown {
+        transform: translateY(-10px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
+    }
+    
+    .user-dropdown.show {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: all;
+    }
     </style>
 </head>
 
@@ -65,10 +83,41 @@
             <button aria-label="Search" class="text-gray-600 hover:text-gray-900 transition-transform hover:scale-110">
                 <i class="fa-solid fa-search"></i>
             </button>
-            <button aria-label="User Account"
-                class="text-gray-600 hover:text-gray-900 transition-transform hover:scale-110">
-                <i class="fa-solid fa-user"></i>
-            </button>
+			<!-- <button aria-label="User Account" -->
+				<!-- class="text-gray-600 hover:text-gray-900 transition-transform hover:scale-110"> -->
+				<!-- <i class="fa-solid fa-user"></i> -->
+			<!-- </button> -->
+			<div class="relative">
+				<button id="user-button" aria-label="User Account"
+					class="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-transform hover:scale-110">
+					<i class="fa-solid fa-user"></i>
+					<span id="user-display-name" class="hidden"></span>
+					<i id="user-dropdown-arrow" class="fa-solid fa-chevron-down text-xs hidden"></i>
+				</button>
+				
+				<!-- User Dropdown Menu (shown when logged in) -->
+				<div id="user-dropdown" class="user-dropdown absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+					<div class="p-3 border-b border-gray-100">
+						<p id="dropdown-user-name" class="font-semibold text-gray-800"></p>
+						<p id="dropdown-user-email" class="text-sm text-gray-500"></p>
+					</div>
+					<div class="py-1">
+						<a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+							<i class="fa-solid fa-user-circle mr-2"></i>Profile
+						</a>
+						<a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+							<i class="fa-solid fa-box mr-2"></i>My Orders
+						</a>
+						<a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+							<i class="fa-solid fa-cog mr-2"></i>Settings
+						</a>
+						<div class="border-t border-gray-100"></div>
+						<button id="logout-btn" class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+							<i class="fa-solid fa-sign-out-alt mr-2"></i>Logout
+						</button>
+					</div>
+				</div>
+			</div>
             <button id="cart-button" aria-label="Shopping Cart"
                 class="relative text-gray-600 hover:text-gray-900 transition-transform hover:scale-110">
                 <i class="fa-solid fa-shopping-bag"></i>
@@ -579,10 +628,87 @@
     </div>
 </div>
 
+<!-- Login Modal -->
+<div id="login-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 transform transition-transform scale-95 opacity-0" id="login-panel">
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center p-6 border-b">
+            <h2 class="text-2xl font-bold">Welcome Back</h2>
+            <button id="close-login-btn" class="text-gray-500 hover:text-gray-800">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        
+        <!-- Modal Body -->
+        <div class="p-6">
+            <!-- Login Form -->
+            <form id="login-form">
+                <div class="mb-4">
+                    <label for="login-email" class="block text-gray-700 mb-2 font-semibold">Email</label>
+                    <input type="email" id="login-email" name="email" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                        placeholder="Enter your email">
+                </div>
+                <div class="mb-6">
+                    <label for="login-password" class="block text-gray-700 mb-2 font-semibold">Password</label>
+                    <div class="relative">
+                        <input type="password" id="login-password" name="password" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                            placeholder="Enter your password">
+                        <button type="button" id="toggle-password" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="mt-2 flex justify-between items-center">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="remember-me" class="mr-2">
+                            <span class="text-sm text-gray-600">Remember me</span>
+                        </label>
+                        <a href="#" class="text-sm text-cyan-600 hover:underline">Forgot password?</a>
+                    </div>
+                </div>
+                <button type="submit" id="login-submit-btn"
+                    class="w-full bg-gray-800 text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition flex items-center justify-center">
+                    <span>Sign In</span>
+                    <i class="fa-solid fa-spinner fa-spin ml-2 hidden" id="login-spinner"></i>
+                </button>
+                <div class="mt-6 text-center">
+                    <p class="text-gray-600">Don't have an account? 
+                        <a href="#" id="show-register-btn" class="text-cyan-600 font-semibold hover:underline">Create account</a>
+                    </p>
+                </div>
+            </form>
+            
+            <!-- Social Login Options -->
+            <div class="mt-6 relative">
+                <div class="absolute inset-0 flex items-center">
+                    <span class="w-full border-t border-gray-300"></span>
+                </div>
+                <div class="relative flex justify-center text-xs uppercase">
+                    <span class="bg-white px-2 text-gray-500">Or continue with</span>
+                </div>
+            </div>
+            <div class="mt-6 flex gap-4">
+                <button type="button" class="flex-1 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                    <i class="fab fa-google text-red-500 mr-2"></i>
+                    Google
+                </button>
+                <button type="button" class="flex-1 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                    <i class="fab fa-apple text-gray-800 mr-2"></i>
+                    Apple
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 
     <!-- JavaScript -->
     <script>
+	
+	
         document.addEventListener('DOMContentLoaded', function () {
             // --- Mobile Menu Toggle ---
             const menuToggle = document.getElementById('menu-toggle');
@@ -756,6 +882,238 @@
             // Initial UI update on load
             updateCartUI();
         });
+		
+			// --- User Authentication & Login Modal Functionality ---
+const userButton = document.getElementById('user-button');
+const userDisplayName = document.getElementById('user-display-name');
+const userDropdownArrow = document.getElementById('user-dropdown-arrow');
+const userDropdown = document.getElementById('user-dropdown');
+const dropdownUserName = document.getElementById('dropdown-user-name');
+const dropdownUserEmail = document.getElementById('dropdown-user-email');
+const loginModal = document.getElementById('login-modal');
+const loginPanel = document.getElementById('login-panel');
+const closeLoginBtn = document.getElementById('close-login-btn');
+const loginForm = document.getElementById('login-form');
+const loginSubmitBtn = document.getElementById('login-submit-btn');
+const loginSpinner = document.getElementById('login-spinner');
+const togglePasswordBtn = document.getElementById('toggle-password');
+const showRegisterBtn = document.getElementById('show-register-btn');
+const logoutBtn = document.getElementById('logout-btn');
+
+// User state management
+let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+
+// Sample users for demo (in real app, this would be handled by backend)
+const users = [
+    { id: 1, name: 'John Doe', email: 'john@example.com', password: 'password123' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', password: 'password123' },
+    { id: 3, name: 'Demo User', email: 'demo@example.com', password: 'demo' }
+];
+
+function updateUserUI() {
+    if (currentUser) {
+        // User is logged in
+        userDisplayName.textContent = currentUser.name;
+        userDisplayName.classList.remove('hidden');
+        userDropdownArrow.classList.remove('hidden');
+        dropdownUserName.textContent = currentUser.name;
+        dropdownUserEmail.textContent = currentUser.email;
+        
+        // Change user icon to indicate logged in state
+        userButton.querySelector('i').className = 'fa-solid fa-user-check text-green-600';
+        userButton.setAttribute('aria-label', `Logged in as ${currentUser.name}`);
+    } else {
+        // User is not logged in
+        userDisplayName.classList.add('hidden');
+        userDropdownArrow.classList.add('hidden');
+        userDropdown.classList.remove('show');
+        
+        // Reset user icon
+        userButton.querySelector('i').className = 'fa-solid fa-user';
+        userButton.setAttribute('aria-label', 'User Account');
+    }
+}
+
+function openLogin() {
+    loginModal.classList.remove('hidden');
+    setTimeout(() => {
+        loginPanel.classList.remove('scale-95', 'opacity-0');
+        loginPanel.classList.add('scale-100', 'opacity-100');
+    }, 10);
+    document.body.style.overflow = 'hidden';
+    
+    // Focus on email input
+    document.getElementById('login-email').focus();
+}
+
+function closeLogin() {
+    loginPanel.classList.remove('scale-100', 'opacity-100');
+    loginPanel.classList.add('scale-95', 'opacity-0');
+    setTimeout(() => {
+        loginModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }, 300);
+    
+    // Clear form
+    loginForm.reset();
+    hideLoginSpinner();
+}
+
+function showLoginSpinner() {
+    loginSpinner.classList.remove('hidden');
+    loginSubmitBtn.disabled = true;
+    loginSubmitBtn.querySelector('span').textContent = 'Signing In...';
+}
+
+function hideLoginSpinner() {
+    loginSpinner.classList.add('hidden');
+    loginSubmitBtn.disabled = false;
+    loginSubmitBtn.querySelector('span').textContent = 'Sign In';
+}
+
+function login(email, password) {
+    // Simulate API call delay
+    showLoginSpinner();
+    
+    setTimeout(() => {
+        const user = users.find(u => u.email === email && u.password === password);
+        
+        if (user) {
+            // Login successful
+            currentUser = { id: user.id, name: user.name, email: user.email };
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            updateUserUI();
+            closeLogin();
+            
+            // Show success message
+            showNotification('Welcome back, ' + user.name + '!', 'success');
+        } else {
+            // Login failed
+            hideLoginSpinner();
+            showNotification('Invalid email or password. Try demo@example.com / demo', 'error');
+        }
+    }, 1500);
+}
+
+function logout() {
+    currentUser = null;
+    localStorage.removeItem('currentUser');
+    updateUserUI();
+    showNotification('You have been logged out successfully.', 'info');
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full`;
+    
+    // Set color based on type
+    if (type === 'success') {
+        notification.classList.add('bg-green-500', 'text-white');
+    } else if (type === 'error') {
+        notification.classList.add('bg-red-500', 'text-white');
+    } else {
+        notification.classList.add('bg-blue-500', 'text-white');
+    }
+    
+    notification.innerHTML = `
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Hide notification after 3 seconds
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+// Event Listeners
+userButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (currentUser) {
+        // Toggle dropdown
+        userDropdown.classList.toggle('show');
+    } else {
+        // Open login modal
+        openLogin();
+    }
+});
+
+closeLoginBtn.addEventListener('click', closeLogin);
+
+loginModal.addEventListener('click', (e) => {
+    if (e.target === loginModal) {
+        closeLogin();
+    }
+});
+
+loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    
+    if (email && password) {
+        login(email, password);
+    }
+});
+
+togglePasswordBtn.addEventListener('click', () => {
+    const passwordInput = document.getElementById('login-password');
+    const icon = togglePasswordBtn.querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash';
+    } else {
+        passwordInput.type = 'password';
+        icon.className = 'fa-solid fa-eye';
+    }
+});
+
+logoutBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    logout();
+});
+
+showRegisterBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeLogin();
+    showNotification('Registration functionality would be implemented here.', 'info');
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    if (!userButton.contains(e.target) && !userDropdown.contains(e.target)) {
+        userDropdown.classList.remove('show');
+    }
+});
+
+// Handle escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        if (!loginModal.classList.contains('hidden')) {
+            closeLogin();
+        }
+        userDropdown.classList.remove('show');
+    }
+});
+
+// Initialize user UI on page load
+updateUserUI();
+
+
     </script>
 
 </body>
